@@ -22,7 +22,7 @@ jobs:
       run: |
         pageNum=$(cat page-number.txt) 
         newNum=$(curl "https://55kbg4ir08.execute-api.us-east-1.amazonaws.com/prod/test/${pageNum}" | jq -r ".pageNum")
-        echo ${newNum} > page-number.text
+        echo ${newNum} > page-number.txt
     - name: Commit files
       run: | 
         git config --local user.email "dengel29@gmail.com"
