@@ -1,10 +1,12 @@
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-
+on: 
+  schedule:
+    - cron: 1/1 * * * *
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "get_rows"
+  # This workflow contains two jobs, scrape then commit.
   scrape:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -20,14 +22,18 @@ jobs:
         pageNum=$(cat page-number.txt) 
         newNum=$(curl "https://55kbg4ir08.execute-api.us-east-1.amazonaws.com/prod/test/${pageNum}" | jq -r ".pageNum")
         echo ${newNum} > page-number.txt
-    - name: Commit files
-      run: | 
-        git config --local user.email "dengel29@gmail.com"
-        git config --local user.name "dengel29"
-        git add .
-        git commit -m "Workflow job: Scrape some pages"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        force: true
+  commit:
+    runs-on: ubuntu-latest
+    needs: scrape
+    steps:
+      - name: Commit files
+        run: | 
+          git config --local user.email "dengel29@gmail.com"
+          git config --local user.name "dengel29"
+          git add .
+          git commit -m "Workflow job: Scrape some pages"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
